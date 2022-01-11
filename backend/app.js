@@ -3,6 +3,7 @@ const express = require("express");
 const app = express();
 
 const mongoose = require("mongoose");
+const saucesRoutes = require("/routes/sauces");
 
 mongoose
   .connect(
@@ -27,8 +28,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res) => {
-  res.json({ message: "Votre requête a bien été reçue !" });
+app.use("/api/sauces", (req, res, next) => {
+  Sauce.find()
+    .then((sauces) => res.status(200).json(sauces))
+    .catch((error) => res.status(400).json({ error }));
 });
+
+app.use("/api/sauces", saucesRoutes);
 
 module.exports = app;
