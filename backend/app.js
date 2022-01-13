@@ -3,8 +3,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 
-const saucesRoutes = require("/routes/sauces");
-const userRoutes = require("/routes/user");
+const saucesRoutes = require("./routes/sauces");
+const userRoutes = require("./routes/user");
 
 mongoose
   .connect(
@@ -33,14 +33,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.use("/images", express.static(path.join(_dirname, "images")));
-
-app.use("/api/sauces", (req, res, next) => {
-  Sauce.find()
-    .then((sauces) => res.status(200).json(sauces))
-    .catch((error) => res.status(400).json({ error }));
-});
-
+app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/sauces", saucesRoutes);
 app.use("/api/auth", userRoutes);
 
