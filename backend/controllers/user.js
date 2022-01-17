@@ -1,8 +1,22 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
+const passwordSchema = require("../models/password");
+const mongoMask = require("mongo-mask");
 
+//SINGUP FUNCTION
 exports.signup = (req, res, next) => {
+  //Validate pw before making new user
+  if (!passwordSchema.validate(req.body.password)) {
+    res.status(400).json({
+      message:
+        "Le mot de passe doit contenir au moins 8 caractères, avec une maj, une min et un chiffre.",
+    });
+  } else {
+    next();
+  }
+
+  // const maskedEmail = @how to do this?!
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
@@ -18,6 +32,7 @@ exports.signup = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }));
 };
 
+//LOGIN FUNCTION
 exports.login = (req, res, next) => {
   User.findOne({ email: req.body.email })
     //Check if user (email used with signup) exists
@@ -43,7 +58,6 @@ exports.login = (req, res, next) => {
               }
             ),
           });
-          res.header("auth-token", token).send(token);
         })
         .catch((error) => res.status(500).json({ error }));
     })

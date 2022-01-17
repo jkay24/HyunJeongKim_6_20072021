@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
 const dotenv = require("dotenv");
-const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
+const helmet = require("helmet");
+const cors = require("cors");
 
 //Import routes
 const saucesRoutes = require("./routes/sauces");
@@ -22,6 +23,8 @@ mongoose
 
 //Middleware
 app.use(express.json());
+app.use(helmet());
+app.use(cors());
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -35,8 +38,6 @@ app.use((req, res, next) => {
   );
   next();
 });
-
-app.use(bodyParser.json());
 
 //Route middlewares
 app.use("/images", express.static(path.join(__dirname, "images")));
