@@ -1,21 +1,26 @@
 const express = require("express");
+const app = express();
+const dotenv = require("dotenv");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 
+//Import routes
 const saucesRoutes = require("./routes/sauces");
 const userRoutes = require("./routes/user");
 
+dotenv.config();
+
+//Connect to database
 mongoose
-  .connect(
-    "mongodb+srv://hyunjkim:blackee!@cluster0.hrgs8.mongodb.net/test?retryWrites=true&w=majority",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(process.env.DB_CONNECT, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("Connexion à MongoDB réussie !"))
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
-const app = express();
-
+//Middleware
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -33,6 +38,7 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+//Route middlewares
 app.use("/images", express.static(path.join(__dirname, "images")));
 app.use("/api/sauces", saucesRoutes);
 app.use("/api/auth", userRoutes);
