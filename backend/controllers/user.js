@@ -15,7 +15,6 @@ exports.signup = (req, res, next) => {
   } else {
     next();
   }
-
   // const maskedEmail = @how to do this?!
   bcrypt
     .hash(req.body.password, 10)
