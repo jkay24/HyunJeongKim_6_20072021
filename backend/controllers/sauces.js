@@ -63,47 +63,27 @@ exports.modifySauce = (req, res, next) => {
         }`,
       }
     : { ...req.body };
-  Sauce.modifyOne(
+  Sauce.updateOne(
     { _id: req.params.id },
     { ...sauceObject, _id: req.params.id }
   )
-    .then(() => {
-      res.status(200).json({
-        message: "Sauce bien modifiée !",
-      });
-    })
-    .catch((error) => {
-      res.status(403).json({
-        error: error,
-        message: "Requête non autorisée !",
-      });
-    });
+    .then(() => res.status(200).json({ message: "Sauce bien modifiée !" }))
+    .catch((error) =>
+      res.status(403).json({ error: error, message: "Requête non autorisée !" })
+    );
 };
 
 exports.deleteSauce = (req, res, next) => {
-  Sauce.findOne({ _id: req.params.id }).then((sauce) => {
-    if (!sauce) {
-      return res.status(404).json({
-        error: new Error("Objet non trouvé !"),
+  Sauce.findOne({ _id: req.params.id })
+    .then((sauce) => {
+      const filename = sauce.imageUrl.split("/images/")[1];
+      fs.unlink(`images/${filename}`, () => {
+        Sauce.deleteOne({ _id: req.params.id })
+          .then(() => res.status(200).json({ message: "Sauce supprimée !" }))
+          .catch((error) => res.status(400).json({ error }));
       });
-    }
-    if (sauce.userId !== req.auth.userId) {
-      return res.status(401).json({
-        error: new Error("Requête non autorisée !"),
-      });
-    }
-
-    Sauce.findOne({ _id: req.params.id })
-      .then((sauce) => {
-        const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, () => {
-          Sauce.deleteOne({ _id: req.params.id })
-            .then(() => res.status(200).json({ message: "Objet supprimé !" }))
-            .catch((error) => res.status(400).json({ error }));
-        });
-      })
-      .catch((error) => res.status(500).json({ error }));
-  });
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
 
 exports.likeDislikeSauce = (req, res, next) => {
@@ -113,7 +93,7 @@ exports.likeDislikeSauce = (req, res, next) => {
   console.log(req.body);
   switch (like) {
     case 1:
-      Sauce.modifyOne(
+      Sauce.updateOne(
         { _id: sauceId },
         { $push: { usersLiked: userId }, $inc: { likes: +1 } }
       )
@@ -126,7 +106,7 @@ exports.likeDislikeSauce = (req, res, next) => {
       Sauce.findOne({ _id: sauceId })
         .then((sauce) => {
           if (sauce.usersLiked.includes(userId)) {
-            Sauce.modifyOne(
+            Sauce.updateOne(
               { _id: sauceId },
               { $pull: { usersLiked: userId }, $inc: { likes: -1 } }
             )
@@ -134,7 +114,7 @@ exports.likeDislikeSauce = (req, res, next) => {
               .catch((error) => res.status(400).json({ error }));
           }
           if (sauce.usersDisliked.includes(userId)) {
-            Sauce.modifyOne(
+            Sauce.updateOne(
               { _id: sauceId },
               { $pull: { usersDisliked: userId }, $inc: { dislikes: -1 } }
             )
@@ -146,7 +126,7 @@ exports.likeDislikeSauce = (req, res, next) => {
       break;
 
     case -1:
-      Sauce.modifyOne(
+      Sauce.updateOne(
         { _id: sauceId },
         { $push: { usersDisliked: userId }, $inc: { dislikes: +1 } }
       )

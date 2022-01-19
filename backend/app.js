@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
 const helmet = require("helmet");
-const cors = require("cors");
 
 //Import routes
 const saucesRoutes = require("./routes/sauces");
@@ -22,10 +21,13 @@ mongoose
   .catch(() => console.log("Connexion à MongoDB échouée !"));
 
 //Middleware
-app.use(express.json());
-app.use(helmet());
-app.use(cors());
 
+app.use(
+  helmet({
+    //@Had to disable this so that images show up...
+    crossOriginResourcePolicy: false,
+  })
+);
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -39,9 +41,11 @@ app.use((req, res, next) => {
   next();
 });
 
-//Route middlewares
+app.use(express.json());
+
+//Routes to middlewares
 app.use("/images", express.static(path.join(__dirname, "images")));
-app.use("/api/sauces", saucesRoutes);
 app.use("/api/auth", userRoutes);
+app.use("/api/sauces", saucesRoutes);
 
 module.exports = app;
