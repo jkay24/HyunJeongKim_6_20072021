@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const passwordSchema = require("../models/password");
-const mongoMask = require("mongo-mask");
+const maskData = require("maskdata");
 
 //SINGUP FUNCTION
 exports.signup = (req, res, next) => {
