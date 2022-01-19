@@ -2,9 +2,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const passwordSchema = require("../models/password");
-const maskData = require("maskdata");
+const MaskData = require("maskdata");
 
-//SINGUP FUNCTION
+//SINGUP FUNCTION - @new signups not working for some reason
 exports.signup = (req, res, next) => {
   //Validate pw before making new user
   if (!passwordSchema.validate(req.body.password)) {
@@ -15,12 +15,11 @@ exports.signup = (req, res, next) => {
   } else {
     next();
   }
-  // const maskedEmail = @how to do this?!
   bcrypt
     .hash(req.body.password, 10)
     .then((hash) => {
       const user = new User({
-        email: req.body.email,
+        email: MaskData.maskEmail2(req.body.email),
         password: hash,
       });
       user
@@ -31,7 +30,7 @@ exports.signup = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }));
 };
 
-//LOGIN FUNCTION
+//LOGIN FUNCTION - @need to test if login works with masked emails
 exports.login = (req, res, next) => {
   User.findOne({ email: req.body.email })
     //Check if user (email used with signup) exists
