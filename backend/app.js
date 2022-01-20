@@ -4,7 +4,6 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
 const helmet = require("helmet");
-const bodyParser = require("body-parser");
 
 //Import routes
 const saucesRoutes = require("./routes/sauces");
