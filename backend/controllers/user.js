@@ -4,7 +4,7 @@ const User = require("../models/user");
 const passwordSchema = require("../models/password");
 const MaskData = require("maskdata");
 
-//SINGUP FUNCTION - @new signups not working for some reason
+//SINGUP FUNCTION
 exports.signup = (req, res, next) => {
   //Validate pw before making new user
   if (!passwordSchema.validate(req.body.password)) {
@@ -13,26 +13,28 @@ exports.signup = (req, res, next) => {
         "Veuillez saisir un mot de passe avec au moins 8 caractères, comprenant une lettre maj, une min et un chiffre.",
     });
   } else {
-    next();
-  }
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => {
-      const user = new User({
-        email: MaskData.maskEmail2(req.body.email),
-        password: hash,
+    bcrypt
+      .hash(req.body.password, 10)
+      .then((hash) => {
+        const user = new User({
+          email: MaskData.maskEmail2(req.body.email),
+          password: hash,
+        });
+        user
+          .save()
+          .then(() => res.status(201).json({ message: "Utilisateur créé !" }))
+          .catch((error) => res.status(400).json({ error }));
+      })
+      .catch((error) => {
+        console.log(error);
+        return res.status(500).json({ error });
       });
-      user
-        .save()
-        .then(() => res.status(201).json({ message: "Utilisateur créé !" }))
-        .catch((error) => res.status(400).json({ error }));
-    })
-    .catch((error) => res.status(500).json({ error }));
+  }
 };
 
-//LOGIN FUNCTION - @need to test if login works with masked emails
+//LOGIN FUNCTION
 exports.login = (req, res, next) => {
-  User.findOne({ email: req.body.email })
+  User.findOne({ email: MaskData.maskEmail2(req.body.email) })
     //Check if user (email used with signup) exists
     .then((user) => {
       if (!user) {
